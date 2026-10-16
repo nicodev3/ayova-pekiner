@@ -1,0 +1,143 @@
+---
+import "../styles/global.css";
+import "../styles/stitch.css";
+import { Font } from "astro:assets";
+import { PUBLIC_NOINDEX } from "astro:env/client";
+import { siteFonts } from "../design/fonts.mjs";
+import { client } from "../lib/client";
+import { professionMainEntityJsonLdType } from "../lib/client/professionCopy.ts";
+import { businessStreetLines } from "../lib/client/businessAddress";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** `article` pour une page d’article ; le reste du site reste `website`. */
+  ogType?: "website" | "article";
+  /** Date de modification déjà écrite dans le frontmatter (`updatedAt`). */
+  modifiedTime?: string;
+  /** Titre visible (h1), sans le suffixe du nom du site. */
+  articleTitle?: string;
+  showFooter?: boolean;
+}
+
+const {
+  title = client.seo.siteName,
+  description = client.seo.description,
+  ogType = "website",
+  modifiedTime: modifiedTimeProp,
+  articleTitle,
+  showFooter = true,
+} = Astro.props;
+
+const pageUrl = new URL(Astro.url.pathname, Astro.site);
+const mainEntityLdType = professionMainEntityJsonLdType(client.profession);
+const fontVariables = (siteFonts ?? []).map((font) => font.cssVariable);
+const siteName = client.seo.siteName ?? client.business.fullName;
+const isHome = Astro.url.pathname === "/";
+
+/** Date ISO déjà présente dans le frontmatter. */
+function isoDate(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed || !/^\d{4}-\d{2}-\d{2}/.test(trimmed)) return undefined;
+  return trimmed;
+}
+
+function jsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
+const modifiedTime = ogType === "article" ? isoDate(modifiedTimeProp) : undefined;
+
+const mainEntityJsonLd = jsonLd({
+  "@context": "https://schema.org",
+  "@type": mainEntityLdType,
+  name: client.business.fullName,
+  ...(mainEntityLdType === "Person" ? { jobTitle: client.business.title } : {}),
+  description: client.seo.description,
+  url: Astro.site,
+  telephone: client.business.phone,
+  email: client.business.email,
+  address: client.business.addressPending
+    ? undefined
+    : {
+        "@type": "PostalAddress",
+        streetAddress: businessStreetLines(client.business).join(", "),
+        postalCode: client.business.postalCode,
+        addressLocality: client.business.city,
+        addressCountry: "FR",
+      },
+});
+
+const webSiteJsonLd = jsonLd({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: siteName,
+  description: client.seo.description,
+  url: Astro.site,
+});
+
+const webPageJsonLd = jsonLd({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: title,
+  ...(description ? { description } : {}),
+  url: pageUrl,
+  isPartOf: {
+    "@type": "WebSite",
+    name: siteName,
+    url: Astro.site,
+  },
+});
+
+const articleJsonLd =
+  ogType === "article"
+    ? jsonLd({
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: articleTitle || title,
+        ...(description ? { description } : {}),
+        url: pageUrl,
+        image: client.seo.ogImage,
+        author: {
+          "@type": "Person",
+          name: client.business.fullName,
+        },
+        ...(modifiedTime ? { dateModified: modifiedTime } : {}),
+      })
+    : "";
+---
+
+<html lang="fr" data-component="layout.base">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {PUBLIC_NOINDEX && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={pageUrl} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:image" content={client.seo.ogImage} />
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={client.seo.ogImage} />
+    {fontVariables.map((cssVariable) => <Font cssVariable={cssVariable as never} preload />)}
+    {isHome && <script is:inline type="application/ld+json" set:html={webSiteJsonLd} />}
+    <script is:inline type="application/ld+json" set:html={webPageJsonLd} />
+    <script is:inline type="application/ld+json" set:html={mainEntityJsonLd} />
+    {articleJsonLd && <script is:inline type="application/ld+json" set:html={articleJsonLd} />}
+  </head>
+
+  <body class="min-h-screen">
+    <slot />
+    {showFooter && <Footer />}
+  </body>
+</html>

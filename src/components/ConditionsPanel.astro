@@ -1,0 +1,42 @@
+---
+import { client } from "../lib/client";
+import { professionConditionsConfidentialitySummary } from "../lib/client/professionCopy.ts";
+import { CONDITIONS_LIMITS_ITEMS } from "../lib/constants";
+
+const confidentialitySummary = professionConditionsConfidentialitySummary(client.profession);
+
+const c = client.conditions;
+---
+
+<section data-component="panel.conditions" aria-labelledby="conditions-title">
+  <h2 id="conditions-title">Conditions du suivi</h2>
+
+  <div data-component="conditions.practical">
+    <div data-component="conditions.cancellation">
+      <h3>Annulation</h3>
+      <p>Délai : {c.cancellation.noticeHours}&nbsp;h</p>
+      <p>{c.cancellation.feePolicy}</p>
+    </div>
+
+    <div data-component="conditions.delay">
+      <h3>Retard</h3>
+      <p>Tolérance : {c.delay.graceMinutes}&nbsp;min</p>
+      <p>{c.delay.note}</p>
+    </div>
+
+    <div data-component="conditions.no-show">
+      <h3>Absence non signalée</h3>
+      <p>{c.noShow.charged ? "Séance due" : "Non facturée"}</p>
+      <p>{c.noShow.note}</p>
+    </div>
+  </div>
+
+  <p>{confidentialitySummary}</p>
+
+  <div data-component="conditions.limits">
+    <h3>Limites de l’accompagnement</h3>
+    <ul>
+      {CONDITIONS_LIMITS_ITEMS.map((item) => <li>{item}</li>)}
+    </ul>
+  </div>
+</section>

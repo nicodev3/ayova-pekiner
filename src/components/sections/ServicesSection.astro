@@ -1,0 +1,39 @@
+---
+import { client } from "../../lib/client";
+import { SITE_BOOKING_SECONDARY_HREF, SITE_BOOKING_SECONDARY_LABEL } from "../../lib/constants";
+
+interface Props {
+  /** Page listant le détail des motifs. */
+  detailsPageHref?: string;
+}
+
+const { detailsPageHref = "/pourquoi-consulter/" } = Astro.props;
+const specialtyLabels = client.practice.specialties;
+---
+
+<section class="space-y-10" data-component="section.services">
+  <h2>Motifs de consultation</h2>
+  {
+    specialtyLabels.length > 0 ? (
+      <>
+        <ul class="flex flex-wrap gap-3">
+          {specialtyLabels.map((label) => (
+            <li class="px-4 py-2 text-sm leading-tight">{label}</li>
+          ))}
+        </ul>
+        <div class="pt-3">
+          <a href={detailsPageHref} class="cta-secondary cta-secondary--sm">
+            Pourquoi consulter ? — Voir tous les motifs
+          </a>
+        </div>
+      </>
+    ) : (
+      <div class="space-y-4">
+        <p>Pour connaître les motifs de consultation, contactez-moi.</p>
+        <a href={SITE_BOOKING_SECONDARY_HREF} class="cta-secondary cta-secondary--sm">
+          {SITE_BOOKING_SECONDARY_LABEL}
+        </a>
+      </div>
+    )
+  }
+</section>

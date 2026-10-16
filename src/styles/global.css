@@ -1,0 +1,714 @@
+@import "tailwindcss";
+
+/**
+ * Tokens du socle (valeurs neutres). Ils alimentent à la fois les variables CSS
+ * et les utilitaires Tailwind (`bg-primary`, `text-muted/70`, `font-serif`, `rounded-xl`…).
+ * Un repo client les surcharge dans `stitch.css` :
+ *   :root { --color-primary: #1d4ed8; --font-sans: var(--font-inter); }
+ */
+@theme static {
+  --color-bg: #ffffff;
+  --color-fg: #111827;
+  --color-primary: var(--color-fg);
+  --color-primary-fg: #ffffff;
+  --color-accent: #f3f4f6;
+  --color-muted: #6b7280;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  --radius-xl: 0.5rem;
+
+  /* Échelle typographique (ratio 1.25) — remplace l’échelle Tailwind par défaut. */
+  --text-*: initial;
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5625rem;
+  --text-2xl: 1.953rem;
+  --text-3xl: 2.441rem;
+  --text-4xl: 3.052rem;
+  --text-5xl: 3.815rem;
+}
+
+/* Typographie de base par élément — graisses, couleurs et polices via stitch.css. */
+@layer base {
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    @apply text-base leading-relaxed;
+    margin: 0;
+    font-family: var(--font-sans);
+    color: var(--color-fg);
+    background: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    @apply text-4xl leading-tight md:text-5xl;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  h2 {
+    @apply text-3xl leading-snug md:text-4xl;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  h3 {
+    @apply text-2xl leading-snug md:text-3xl;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  h4 {
+    @apply text-xl leading-snug;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  h5 {
+    @apply text-lg leading-snug;
+  }
+
+  h6 {
+    @apply text-base leading-snug;
+  }
+}
+
+@layer components {
+  /* Variantes de texte */
+  .lead {
+    @apply text-lg leading-relaxed;
+    text-wrap: pretty;
+  }
+
+  .note {
+    @apply text-sm leading-relaxed;
+    text-wrap: pretty;
+  }
+
+  .site-container {
+    @apply mx-auto w-full max-w-5xl px-4 md:px-6;
+  }
+
+  /* Pages intérieures — structure minimale, styles visuels via stitch.css */
+  .page {
+    @apply py-16 space-y-8;
+  }
+
+  .page-header {
+    @apply space-y-2;
+  }
+
+  .page-header--actions {
+    @apply space-y-3;
+  }
+
+  .page-content {
+    @apply space-y-8;
+    max-width: 72ch;
+  }
+
+  .page-block {
+    @apply space-y-3;
+  }
+
+  .section-spacing {
+    @apply py-12;
+  }
+
+  /* Hooks sémantiques — apparence dans stitch.css */
+  .cta-primary,
+  .cta-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5;
+  }
+
+  .cta-primary--sm {
+    @apply px-5 py-3;
+  }
+
+  .cta-primary--footer {
+    @apply h-11 min-w-44 px-4 text-sm;
+  }
+
+  .cta-secondary--sm {
+    @apply px-4 py-2.5 text-sm;
+  }
+
+  .form-field {
+    @apply w-full px-4 py-3 text-base;
+  }
+
+  /* Contenu Markdown (articles, pages pratique) */
+  .content-rich > * + * {
+    @apply mt-4;
+  }
+
+  .content-rich {
+    max-width: 72ch;
+  }
+
+  .content-rich :where(p, li, blockquote) {
+    text-wrap: pretty;
+  }
+
+  .content-rich ul,
+  .content-rich ol {
+    @apply pl-5;
+  }
+
+  .content-rich ul {
+    @apply list-disc;
+  }
+
+  .content-rich ol {
+    @apply list-decimal;
+  }
+}
+
+@layer base {
+  a {
+    text-underline-position: from-font;
+    text-decoration-thickness: from-font;
+  }
+
+  :where(input, textarea, select, button) {
+    font: inherit;
+  }
+
+  :where(input, textarea, select) {
+    font-size: max(1rem, 1em);
+    line-height: 1.5;
+  }
+
+  :where(time, [data-tabular-numeric], .tabular-nums) {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Structure de la page À propos, sans habillage de marque. */
+  [data-component="ui.header-stack"] {
+    background: var(--color-bg);
+  }
+
+  [data-component="page"]:has(
+    [data-component="about.page"],
+    [data-component="pricing.page"],
+    [data-component="contact.page"]
+  ) {
+    padding-block: 2rem 4rem;
+  }
+
+  .page-content:has(
+    > [data-component="about.page"],
+    > [data-component="pricing.page"],
+    > [data-component="contact.page"]
+  ) {
+    max-width: none;
+  }
+
+  [data-component="about.page"] {
+    display: grid;
+    gap: 3rem;
+    overflow-wrap: anywhere;
+  }
+
+  [data-component="about.intro"] {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  [data-component="about.page"][data-portrait="absent"] [data-component="about.intro"] {
+    display: block;
+    max-inline-size: 65ch;
+  }
+
+  [data-component="about.identity"] {
+    min-inline-size: 0;
+  }
+
+  [data-component="about.eyebrow"] {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin-block-end: 0.5rem;
+  }
+
+  [data-component="about.identity"] h1 {
+    font-weight: 600;
+  }
+
+  [data-component="about.profession"] {
+    margin-block-start: 0.75rem;
+  }
+
+  [data-component="about.page"] [data-component="ui.practitioner-portrait"] {
+    inline-size: min(100%, 12rem);
+  }
+
+  [data-component="about.page"] [data-component="ui.practitioner-portrait"] > div {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+
+  [data-component="about.overview"] {
+    display: grid;
+    align-items: start;
+    gap: 2rem;
+  }
+
+  [data-component="about.presentation"],
+  [data-component="about.summary"] {
+    display: grid;
+    gap: 1rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="about.page"] h2 {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  [data-component="about.presentation"] > p {
+    max-inline-size: 65ch;
+    line-height: 1.65;
+    white-space: pre-line;
+    text-wrap: pretty;
+  }
+
+  [data-component="about.summary"] h2 {
+    font-size: var(--text-lg);
+  }
+
+  [data-component="about.actions"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    margin-block-start: 0.5rem;
+  }
+
+  [data-component="about.actions"] a {
+    min-block-size: 2.75rem;
+    max-inline-size: 100%;
+    padding-inline: 0;
+    text-align: center;
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  [data-component="about.actions"] a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  [data-component="about.page"] [data-component="panel.credentials"] {
+    display: grid;
+    gap: 2rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="credentials.facts"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 3rem;
+  }
+
+  [data-component="credentials.facts"] dt,
+  [data-component="credentials.period"] {
+    font-size: var(--text-sm);
+  }
+
+  [data-component="credentials.facts"] dd {
+    margin-block-start: 0.25rem;
+    font-size: var(--text-lg);
+    font-weight: 500;
+  }
+
+  [data-component="panel.credentials"] > section {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="panel.credentials"] h3 {
+    font-size: var(--text-lg);
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  [data-component="panel.credentials"] ul {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  [data-component="panel.credentials"] li > * + * {
+    margin-block-start: 0.25rem;
+  }
+
+  [data-component="credentials.item-title"] {
+    font-weight: 600;
+  }
+
+  [data-component="credentials.affiliations"] ul {
+    list-style: disc;
+    padding-inline-start: 1.25rem;
+    gap: 0.5rem;
+  }
+
+  @media (width < 30rem) {
+    [data-component="about.page"] [data-component="ui.practitioner-portrait"] {
+      inline-size: min(100%, 10rem);
+    }
+
+    [data-component="about.identity"] h1 {
+      font-size: var(--text-3xl);
+    }
+  }
+
+  @media (width >= 48rem) {
+    [data-component="about.page"][data-portrait="present"] [data-component="about.intro"] {
+      grid-template-columns: 16rem minmax(0, 1fr);
+      align-items: center;
+      gap: 2.5rem;
+    }
+
+    [data-component="about.page"] [data-component="ui.practitioner-portrait"] {
+      inline-size: 100%;
+    }
+
+    [data-component="about.page"] [data-component="panel.credentials"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2.5rem 3rem;
+    }
+
+    [data-component="panel.credentials"] > h2,
+    [data-component="credentials.facts"],
+    [data-component="credentials.experiences"],
+    [data-component="credentials.affiliations"] {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (width >= 64rem) {
+    [data-component="about.overview"] {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      gap: 3rem;
+    }
+  }
+}
+
+@layer components {
+  /* Tarifs : lecture comparée des prestations, sans habillage décoratif. */
+  [data-component="pricing.page"] {
+    display: grid;
+    gap: 3rem;
+    overflow-wrap: anywhere;
+  }
+
+  [data-component="page"]:has([data-component="pricing.page"]) > .page-header h1 {
+    font-weight: 600;
+  }
+
+  [data-component="pricing.page"] h2 {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  [data-component="pricing.page"] h3 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  [data-component="pricing.page"] > section,
+  [data-component="pricing.practical"] > section {
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="pricing.list"] > ul,
+  [data-component="pricing.practical"],
+  [data-component="conditions.practical"] {
+    display: grid;
+    gap: 2rem;
+  }
+
+  [data-component="pricing.item"] {
+    display: grid;
+    align-items: start;
+    gap: 1rem 2rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="pricing.description"],
+  [data-component="pricing.reduced-rate"],
+  [data-component="conditions.practical"] > div,
+  [data-component="conditions.limits"] {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="pricing.details"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  [data-component="pricing.details"] dt {
+    font-size: var(--text-sm);
+  }
+
+  [data-component="pricing.details"] dd {
+    margin-block-start: 0.25rem;
+    font-size: var(--text-xl);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  [data-component="pricing.page"] p,
+  [data-component="conditions.limits"] li {
+    max-inline-size: 65ch;
+    text-wrap: pretty;
+  }
+
+  [data-component="pricing.payment"] ul,
+  [data-component="conditions.limits"] ul {
+    display: grid;
+    gap: 0.5rem;
+    list-style: disc;
+    padding-inline-start: 1.25rem;
+  }
+
+  [data-component="pricing.contact-cta"] a {
+    justify-self: start;
+    min-block-size: 2.75rem;
+    max-inline-size: 100%;
+    padding-inline: 0;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  [data-component="pricing.contact-cta"] a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  @media (width >= 48rem) {
+    [data-component="pricing.item"] {
+      grid-template-columns: minmax(0, 1fr) 16rem;
+    }
+
+    [data-component="pricing.practical"],
+    [data-component="conditions.practical"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2rem 3rem;
+    }
+  }
+
+  @media (width >= 64rem) {
+    [data-component="conditions.practical"] {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+}
+
+@layer components {
+  /* Contact : groupes lisibles et contrôles visibles, sans design de marque. */
+  [data-component="contact.page"] {
+    display: grid;
+    gap: 3rem;
+    overflow-wrap: anywhere;
+  }
+
+  [data-component="page"]:has([data-component="contact.page"]) > .page-header h1 {
+    font-weight: 600;
+  }
+
+  [data-component="contact.page"] h2 {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  [data-component="contact.page"] h3 {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  [data-component="contact.info"],
+  [data-component="contact.availability"] {
+    display: grid;
+    align-items: start;
+    gap: 2.5rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="contact.details"],
+  [data-component="contact.form"],
+  [data-component="contact.form"] form {
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="contact.address"],
+  [data-component="contact.booking"],
+  [data-component="contact.waiting"],
+  [data-component="contact.hours-block"],
+  [data-component="contact.channels"] {
+    display: grid;
+    gap: 1rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="contact.page"] address {
+    font-style: normal;
+  }
+
+  [data-component="contact.channels"] dt,
+  [data-component="contact.field"] label {
+    font-weight: 500;
+  }
+
+  [data-component="contact.channels"] dd {
+    margin-block-start: 0.25rem;
+  }
+
+  [data-component="contact.quick-actions"] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  [data-component="contact.page"] a {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  [data-component="contact.quick-actions"] a,
+  [data-component="contact.booking"] a {
+    justify-self: start;
+    min-block-size: 2.75rem;
+    max-inline-size: 100%;
+    padding-inline: 0;
+  }
+
+  [data-component="contact.page"] p {
+    max-inline-size: 65ch;
+    text-wrap: pretty;
+  }
+
+  [data-component="contact.hours-block"] table {
+    inline-size: 100%;
+    max-inline-size: 30rem;
+    table-layout: fixed;
+    font-variant-numeric: tabular-nums;
+  }
+
+  [data-component="contact.hours-block"] th,
+  [data-component="contact.hours-block"] td {
+    padding-block: 0.5rem;
+    vertical-align: top;
+  }
+
+  [data-component="contact.hours-block"] th {
+    inline-size: 40%;
+    padding-inline-end: 1rem;
+    text-align: start;
+    font-weight: 500;
+  }
+
+  [data-component="contact.hours-block"] td {
+    text-align: end;
+  }
+
+  [data-component="contact.map"] {
+    position: relative;
+    isolation: isolate;
+    z-index: 0;
+  }
+
+  [data-component="contact.form"] {
+    max-inline-size: 48rem;
+    scroll-margin-block-start: 14rem;
+  }
+
+  [data-component="contact.form-identity"] {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  [data-component="contact.field"] {
+    display: grid;
+    gap: 0.5rem;
+    min-inline-size: 0;
+  }
+
+  [data-component="contact.form"] .form-field {
+    min-inline-size: 0;
+    border: 1px solid currentColor;
+    font-size: var(--text-base);
+    line-height: 1.5;
+  }
+
+  [data-component="contact.form"] textarea {
+    min-block-size: 10rem;
+    resize: vertical;
+  }
+
+  [data-component="contact.form"] button[type="submit"] {
+    justify-self: start;
+    min-block-size: 2.75rem;
+    max-inline-size: 100%;
+    border: 1px solid currentColor;
+    font-weight: 500;
+  }
+
+  [data-component="contact.page"] :is(a, button, input, textarea, summary):focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  [data-component="contact.page"] [data-component="faq.item"] summary {
+    min-block-size: 2.75rem;
+    padding-block: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  [data-component="contact.page"] [data-component="faq.item"] p {
+    margin-block: 0.5rem 1rem;
+  }
+
+  @media (width >= 48rem) {
+    [data-component="contact.info"]:has(> [data-component="contact.availability"]) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 3rem;
+    }
+
+    [data-component="contact.form-identity"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}

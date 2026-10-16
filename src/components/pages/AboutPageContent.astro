@@ -1,0 +1,66 @@
+---
+import CredentialsPanel from "../CredentialsPanel.astro";
+import PractitionerPortrait from "../PractitionerPortrait.astro";
+import { client } from "../../lib/client";
+import { practitionerPortrait } from "../../lib/practitionerPortrait";
+import {
+  bookingPrimaryIsExternal,
+  resolvedBookingPrimaryHref,
+  SITE_BOOKING_PRIMARY_LABEL,
+} from "../../lib/client/siteBooking";
+import { SITE_BOOKING_SECONDARY_HREF, SITE_BOOKING_SECONDARY_LABEL } from "../../lib/constants";
+
+const sidebarSummary = client.aboutPage.sidebarSummary ?? "";
+const introParagraphs = client.aboutPage.intro
+  .split(/\n\s*\n/)
+  .map((p) => p.trim())
+  .filter(Boolean);
+const bookingHref = resolvedBookingPrimaryHref(client);
+const bookingExternal = bookingPrimaryIsExternal(bookingHref);
+---
+
+<div data-component="about.page" data-portrait={practitionerPortrait ? "present" : "absent"}>
+  <header data-component="about.intro">
+    {practitionerPortrait && <PractitionerPortrait />}
+    <div data-component="about.identity">
+      <p data-component="about.eyebrow">À propos</p>
+      <h1>{client.business.fullName}</h1>
+      <p data-component="about.profession">
+        {client.business.title}{client.business.city && ` à ${client.business.city}`}
+      </p>
+    </div>
+  </header>
+
+  <div data-component="about.overview">
+    {
+      introParagraphs.length > 0 && (
+        <section data-component="about.presentation" aria-labelledby="about-presentation-title">
+          <h2 id="about-presentation-title">Mon accompagnement</h2>
+          {introParagraphs.map((paragraph) => (
+            <p>{paragraph}</p>
+          ))}
+        </section>
+      )
+    }
+
+    <aside data-component="about.summary" aria-labelledby="about-summary-title">
+      <h2 id="about-summary-title">
+        {sidebarSummary ? "En quelques mots" : "Échangeons sur votre situation"}
+      </h2>
+      {sidebarSummary && <p>{sidebarSummary}</p>}
+      <div data-component="about.actions">
+        <a
+          class="cta-primary"
+          href={bookingHref}
+          {...bookingExternal ? { target: "_blank", rel: "noopener noreferrer" } : {}}
+          >{SITE_BOOKING_PRIMARY_LABEL}</a
+        >
+        <a class="cta-secondary" href={SITE_BOOKING_SECONDARY_HREF}
+          >{SITE_BOOKING_SECONDARY_LABEL}</a
+        >
+      </div>
+    </aside>
+  </div>
+
+  <CredentialsPanel />
+</div>

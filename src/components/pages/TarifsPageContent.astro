@@ -1,0 +1,102 @@
+---
+import ConditionsPanel from "../ConditionsPanel.astro";
+import MonSoutienPsyCallout from "../MonSoutienPsyCallout.astro";
+import { client } from "../../lib/client";
+import { getSiteCopy } from "../../lib/siteCopy";
+import {
+  REIMBURSEMENT_MUTUELLE_NOTICE,
+  SITE_BOOKING_SECONDARY_HREF,
+  SITE_BOOKING_SECONDARY_LABEL,
+} from "../../lib/constants";
+
+const copy = await getSiteCopy("tarifs");
+const pricingItems =
+  copy.data.items && copy.data.items.length > 0 ? copy.data.items : client.pricing.items;
+const reducedRateNote = client.pricing.reducedRateNote ?? "";
+const priceFormat = new Intl.NumberFormat("fr-FR", {
+  style: "currency",
+  currency: "EUR",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+});
+---
+
+<div data-component="pricing.page">
+  <section data-component="pricing.list" aria-labelledby="pricing-list-title">
+    <h2 id="pricing-list-title">Consultations et bilans</h2>
+    {
+      pricingItems.length > 0 ? (
+        <ul>
+          {pricingItems.map((it) => (
+            <li data-component="pricing.item">
+              <div data-component="pricing.description">
+                <h3>{it.name}</h3>
+                {it.note && <p>{it.note}</p>}
+              </div>
+              <dl data-component="pricing.details">
+                <div>
+                  <dt>Tarif</dt>
+                  <dd data-component="pricing.amount">{priceFormat.format(it.price)}</dd>
+                </div>
+                <div>
+                  <dt>Durée</dt>
+                  <dd>{it.durationMinutes}&nbsp;min</dd>
+                </div>
+              </dl>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>
+          Les tarifs sont en cours de mise à jour. Contactez-moi pour connaître le tarif d’une
+          consultation.
+        </p>
+      )
+    }
+    {
+      reducedRateNote && (
+        <div data-component="pricing.reduced-rate">
+          <>
+            <h3>Tarif adapté</h3>
+            <p>{reducedRateNote}</p>
+          </>
+        </div>
+      )
+    }
+  </section>
+
+  <div data-component="pricing.practical">
+    <section data-component="pricing.payment" aria-labelledby="pricing-payment-title">
+      <h2 id="pricing-payment-title">Moyens de paiement</h2>
+      {
+        client.pricing.payment.length > 0 ? (
+          <ul>
+            {client.pricing.payment.map((payment) => (
+              <li>{payment}</li>
+            ))}
+          </ul>
+        ) : (
+          <p>Contactez-moi pour connaître les moyens de paiement acceptés.</p>
+        )
+      }
+    </section>
+
+    <section data-component="pricing.reimbursement" aria-labelledby="pricing-reimbursement-title">
+      <h2 id="pricing-reimbursement-title">Remboursement</h2>
+      <p>
+        Les consultations ne sont pas remboursées par la Sécurité sociale. {
+          REIMBURSEMENT_MUTUELLE_NOTICE
+        }
+      </p>
+      <MonSoutienPsyCallout headingLevel={3} />
+    </section>
+  </div>
+
+  <ConditionsPanel />
+
+  <section data-component="pricing.contact-cta" aria-labelledby="pricing-contact-title">
+    <h2 id="pricing-contact-title">Une question sur les tarifs ?</h2>
+    <p>Vous pouvez me contacter pour toute précision sur les séances et leur règlement.</p>
+    <a href={SITE_BOOKING_SECONDARY_HREF} class="cta-primary">{SITE_BOOKING_SECONDARY_LABEL}</a>
+  </section>
+</div>

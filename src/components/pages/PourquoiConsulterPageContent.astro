@@ -1,0 +1,29 @@
+---
+import { client } from "../../lib/client";
+import { getSpecialtyMotifSummary } from "../../lib/client/specialtyMotifSummaries.ts";
+import { SITE_BOOKING_SECONDARY_HREF, SITE_BOOKING_SECONDARY_LABEL } from "../../lib/constants";
+
+const specialtyLabels = client.practice.specialties;
+---
+
+<section class="page-block" data-component="motifs.list">
+  {
+    specialtyLabels.length > 0 ? (
+      <ul>
+        {specialtyLabels.map((label) => (
+          <li data-component="motifs.item">
+            <p class="font-medium">{label}</p>
+            <p>{getSpecialtyMotifSummary(label)}</p>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <div class="space-y-4">
+        <p>Les motifs de consultation sont en cours de mise à jour. Contactez-moi pour échanger sur votre situation.</p>
+        <a href={SITE_BOOKING_SECONDARY_HREF} class="cta-secondary cta-secondary--sm">
+          {SITE_BOOKING_SECONDARY_LABEL}
+        </a>
+      </div>
+    )
+  }
+</section>

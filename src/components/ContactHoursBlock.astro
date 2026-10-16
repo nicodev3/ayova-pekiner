@@ -1,0 +1,24 @@
+---
+import { enabledContactHoursRows } from "../lib/client/contactHours";
+import { client } from "../lib/client";
+
+const hoursRows = enabledContactHoursRows(client.contact.hours);
+---
+
+{
+  hoursRows.length > 0 && (
+    <div data-component="contact.hours-block">
+      <h2 id="contact-hours-title">Horaires</h2>
+      <table aria-labelledby="contact-hours-title">
+        <tbody>
+          {hoursRows.map((row) => (
+            <tr>
+              <th scope="row">{row.label}</th>
+              <td>{row.value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}

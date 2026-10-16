@@ -1,0 +1,54 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Breadcrumb from "../components/Breadcrumb.astro";
+import { client } from "../lib/client";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Chapô sous le titre ; par défaut la description SEO. */
+  intro?: string;
+  /** La page fournit son propre en-tête (ex. à propos avec portrait). */
+  hidePageHeader?: boolean;
+  ogType?: "website" | "article";
+  /** Repris tel quel depuis le frontmatter `updatedAt`, s’il existe. */
+  modifiedTime?: string;
+}
+
+const {
+  title,
+  description = "",
+  intro = description,
+  hidePageHeader = false,
+  ogType = "website",
+  modifiedTime,
+} = Astro.props;
+---
+
+<BaseLayout
+  title={`${title} — ${client.seo.siteName}`}
+  description={description}
+  ogType={ogType}
+  modifiedTime={modifiedTime}
+  articleTitle={ogType === "article" ? title : undefined}
+>
+  <Header />
+  <Breadcrumb currentLabel={title} />
+
+  <main class="site-container page" data-component="page">
+    {
+      !hidePageHeader && (
+        <header class:list={["page-header", Astro.slots.has("actions") && "page-header--actions"]}>
+          <h1>{title}</h1>
+          {intro && <p class="lead">{intro}</p>}
+          <slot name="actions" />
+        </header>
+      )
+    }
+
+    <div class="page-content">
+      <slot />
+    </div>
+  </main>
+</BaseLayout>

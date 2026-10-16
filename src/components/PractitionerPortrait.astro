@@ -1,0 +1,30 @@
+---
+import { Image } from "astro:assets";
+import { client } from "../lib/client";
+import { practitionerPortrait as photo } from "../lib/practitionerPortrait";
+
+interface Props {
+  class?: string;
+}
+
+const { class: figureClass } = Astro.props;
+---
+
+{
+  photo && (
+    <figure class={figureClass} data-component="ui.practitioner-portrait">
+      <div>
+        <Image
+          src={photo}
+          alt={`${client.business.fullName}, ${client.business.title}`}
+          class="h-full w-full object-cover"
+          widths={[160, 192, 256, 384, 512]}
+          sizes="(min-width: 768px) 256px, (min-width: 480px) 192px, 160px"
+          quality={85}
+          width={420}
+          height={525}
+        />
+      </div>
+    </figure>
+  )
+}

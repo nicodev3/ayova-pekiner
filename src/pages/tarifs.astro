@@ -1,0 +1,16 @@
+---
+export const pageNav = {
+  navLabel: "Tarifs",
+  navOrder: 10,
+};
+
+import StandardPageLayout from "../layouts/StandardPageLayout.astro";
+import TarifsPageContent from "../components/pages/TarifsPageContent.astro";
+---
+
+<StandardPageLayout
+  title="Tarifs"
+  description="Les tarifs sont indiqués à titre informatif. N'hésitez pas à me contacter si besoin."
+>
+  <TarifsPageContent />
+</StandardPageLayout>

@@ -1,0 +1,55 @@
+---
+import ContactCard from "../ContactCard.astro";
+import ContactHoursBlock from "../ContactHoursBlock.astro";
+import ContactForm from "../ContactForm.astro";
+import FaqSection from "../FaqSection.astro";
+import { enabledContactHoursRows } from "../../lib/client/contactHours";
+import { client } from "../../lib/client";
+import {
+  bookingPrimaryIsExternal,
+  resolvedBookingPrimaryHref,
+  SITE_BOOKING_PRIMARY_LABEL,
+} from "../../lib/client/siteBooking";
+
+const hasHours = enabledContactHoursRows(client.contact.hours).length > 0;
+const waitingListNote = client.practice.waitingListNote ?? "";
+const hasBooking = client.contact.channels.selected.includes("doctolib");
+const bookingHref = resolvedBookingPrimaryHref(client);
+const bookingExternal = bookingPrimaryIsExternal(bookingHref);
+---
+
+<div data-component="contact.page">
+  <div data-component="contact.info">
+    <ContactCard stacked />
+    {
+      (hasHours || waitingListNote || hasBooking) && (
+        <div data-component="contact.availability">
+          {hasBooking && (
+            <section data-component="contact.booking" aria-labelledby="contact-booking-title">
+              <h2 id="contact-booking-title">Prendre rendez-vous</h2>
+              <p>Consultez les disponibilités et prenez rendez-vous sur Doctolib.</p>
+              <a
+                href={bookingHref}
+                class="cta-primary"
+                {...(bookingExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              >
+                {SITE_BOOKING_PRIMARY_LABEL}
+              </a>
+            </section>
+          )}
+          {hasHours && <ContactHoursBlock />}
+          {waitingListNote && (
+            <section data-component="contact.waiting" aria-labelledby="contact-waiting-title">
+              <h3 id="contact-waiting-title">Disponibilités</h3>
+              <p>{waitingListNote}</p>
+            </section>
+          )}
+        </div>
+      )
+    }
+  </div>
+
+  {client.contact.channels.selected.includes("form") && <ContactForm />}
+
+  <FaqSection />
+</div>

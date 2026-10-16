@@ -1,0 +1,99 @@
+---
+import { FORMSPREE_FORM_ID } from "../lib/constants";
+import { client } from "../lib/client";
+
+const nextUrl = `${client.seo.baseUrl.replace(/\/+$/, "")}/contact/?sent=1`;
+const action = `https://formspree.io/f/${FORMSPREE_FORM_ID}`;
+const sent = Astro.url.searchParams.get("sent") === "1";
+const confirmation = "Merci : votre message a bien été envoyé.";
+---
+
+<section id="ecrire" aria-labelledby="contact-form-heading" data-component="contact.form">
+  <h2 id="contact-form-heading">Envoyer un message</h2>
+  <p>
+    Décrivez brièvement votre demande et indiquez vos coordonnées pour que je puisse vous répondre.
+  </p>
+  <p class="note">Les champs marqués « obligatoire » sont à renseigner.</p>
+
+  <p
+    role="status"
+    tabindex="-1"
+    data-component="contact.confirmation"
+    data-message={confirmation}
+    hidden={!sent}
+  >
+    {sent ? confirmation : ""}
+  </p>
+
+  <form method="POST" action={action}>
+    <input type="hidden" name="_next" value={nextUrl} />
+    <input
+      type="hidden"
+      name="_subject"
+      value={`Message depuis le site — ${client.seo.siteName}`}
+    />
+
+    <p class="sr-only" aria-hidden="true">
+      <label>
+        Ne pas remplir ce champ
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
+      </label>
+    </p>
+
+    <div data-component="contact.form-identity">
+      <div data-component="contact.field">
+        <label for="contact-name"> Nom (obligatoire) </label>
+        <input
+          id="contact-name"
+          name="name"
+          type="text"
+          required
+          autocomplete="name"
+          class="form-field"
+        />
+      </div>
+
+      <div data-component="contact.field">
+        <label for="contact-email"> E-mail (obligatoire) </label>
+        <input
+          id="contact-email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+          class="form-field"
+        />
+      </div>
+    </div>
+
+    <div data-component="contact.field">
+      <label for="contact-phone">Téléphone (optionnel)</label>
+      <input id="contact-phone" name="phone" type="tel" autocomplete="tel" class="form-field" />
+    </div>
+
+    <div data-component="contact.field">
+      <label for="contact-message"> Message (obligatoire) </label>
+      <textarea id="contact-message" name="message" required rows={5} class="form-field"></textarea>
+    </div>
+
+    <p class="note">
+      Vos coordonnées servent à vous répondre. <a href="/mentions-legales/#donnees-personnelles"
+        >Informations sur la protection des données</a
+      >.
+    </p>
+    <button type="submit" class="cta-primary"> Envoyer le message </button>
+  </form>
+</section>
+
+<script>
+  // La redirection est lue dans le navigateur : les pages publiées sont statiques.
+  const confirmation = document.querySelector<HTMLElement>(
+    '[data-component="contact.confirmation"]',
+  );
+  if (confirmation && new URLSearchParams(window.location.search).get("sent") === "1") {
+    confirmation.hidden = false;
+    confirmation.textContent = confirmation.dataset.message ?? "";
+    confirmation.focus({ preventScroll: true });
+    confirmation.scrollIntoView({ block: "center", behavior: "auto" });
+  }
+</script>

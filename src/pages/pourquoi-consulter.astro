@@ -1,0 +1,28 @@
+---
+export const pageNav = {
+  navLabel: "Pourquoi consulter ?",
+  navOrder: 25,
+};
+
+import StandardPageLayout from "../layouts/StandardPageLayout.astro";
+import PourquoiConsulterPageContent from "../components/pages/PourquoiConsulterPageContent.astro";
+import { client } from "../lib/client";
+
+const hasSpecialties = client.practice.specialties.length > 0;
+---
+
+<StandardPageLayout
+  title="Pourquoi consulter ?"
+  description={
+    hasSpecialties
+      ? "Découvrez les principaux motifs de consultation et l'accompagnement proposé selon votre situation."
+      : "Les motifs de consultation sont en cours de mise à jour. Contactez-moi pour parler de votre situation."
+  }
+  intro={
+    hasSpecialties
+      ? "Vous trouverez ici les principaux motifs de consultation avec un aperçu de l'accompagnement possible."
+      : "Les motifs de consultation sont en cours de mise à jour. Contactez-moi pour échanger sur votre situation."
+  }
+>
+  <PourquoiConsulterPageContent />
+</StandardPageLayout>

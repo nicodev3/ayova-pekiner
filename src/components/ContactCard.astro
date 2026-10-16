@@ -1,0 +1,199 @@
+---
+import { MessageCircle, CalendarDays } from "@lucide/astro";
+import { client } from "../lib/client";
+import { businessAddressText, businessStreetLines } from "../lib/client/businessAddress";
+import { resolvedBookingPrimaryHref } from "../lib/client/siteBooking";
+import { resolvedWhatsappHref } from "../lib/client/whatsapp";
+
+interface Props {
+  stacked?: boolean;
+}
+
+const { stacked = false } = Astro.props;
+const b = client.business;
+const channels = new Set(client.contact.channels.selected);
+const accessNote = client.contact.accessNote ?? "";
+const mapAddress = `${b.addressLine1}, ${b.postalCode} ${b.city}`;
+---
+
+<section data-component="contact.card" aria-labelledby="contact-details-title">
+  <div class:list={["grid gap-6", !stacked && !b.addressPending && "md:grid-cols-2"]}>
+    <div data-component="contact.details">
+      <h2 id="contact-details-title">Coordonnées et accès</h2>
+      <div data-component="contact.address">
+        <h3>Cabinet {b.fullName}</h3>
+        <address>
+          {
+            b.addressPending ? (
+              <p>{businessAddressText(b)}</p>
+            ) : (
+              <>
+                {businessStreetLines(b).map((line) => (
+                  <p>{line}</p>
+                ))}
+                <p>
+                  {b.postalCode} {b.city}
+                </p>
+              </>
+            )
+          }
+        </address>
+        {!b.addressPending && accessNote && <p>{accessNote}</p>}
+        {
+          !b.addressPending && (
+            <a
+              href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(mapAddress)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Voir l’adresse sur OpenStreetMap
+            </a>
+          )
+        }
+      </div>
+      <dl data-component="contact.channels">
+        {
+          channels.has("phone") && (
+            <div>
+              <>
+                <dt>Téléphone</dt>
+                <dd>
+                  <a href={`tel:${b.phone.replace(/\s/g, "")}`}>{b.phone}</a>
+                </dd>
+              </>
+            </div>
+          )
+        }
+        {
+          channels.has("email") && (
+            <div>
+              <>
+                <dt>E-mail</dt>
+                <dd>
+                  <a href={`mailto:${b.email}`}>{b.email}</a>
+                </dd>
+              </>
+            </div>
+          )
+        }
+        {
+          channels.has("other") && client.contact.channels.other && (
+            <div>
+              <>
+                <dt>Autre moyen de contact</dt>
+                <dd>{client.contact.channels.other}</dd>
+              </>
+            </div>
+          )
+        }
+      </dl>
+      {
+        (channels.has("whatsapp") || channels.has("doctolib")) && (
+          <div data-component="contact.quick-actions">
+            {channels.has("whatsapp") && (
+              <a
+                href={resolvedWhatsappHref(client)}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="cta-secondary cta-secondary--sm"
+              >
+                <MessageCircle class="size-4 shrink-0" size={16} aria-hidden="true" />
+                WhatsApp
+              </a>
+            )}
+            {channels.has("doctolib") && (
+              <a
+                href={resolvedBookingPrimaryHref(client)}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="cta-secondary cta-secondary--sm"
+              >
+                <CalendarDays class="size-4 shrink-0" size={16} aria-hidden="true" />
+                Message via Doctolib
+              </a>
+            )}
+          </div>
+        )
+      }
+    </div>
+    {
+      !b.addressPending && (
+        <div
+          class="min-h-64 w-full"
+          data-component="contact.map"
+          data-map-address={mapAddress}
+          data-map-name={b.fullName}
+          role="region"
+          aria-label="Localisation du cabinet"
+          hidden
+        />
+      )
+    }
+  </div>
+</section>
+
+<script>
+  import L from "leaflet";
+  import "leaflet/dist/leaflet.css";
+
+  const ZOOM = 16;
+
+  async function geocodeAddress(address: string): Promise<L.LatLngTuple | null> {
+    const endpoint = new URL("https://nominatim.openstreetmap.org/search");
+    endpoint.searchParams.set("format", "jsonv2");
+    endpoint.searchParams.set("limit", "1");
+    endpoint.searchParams.set("countrycodes", "fr");
+    endpoint.searchParams.set("accept-language", "fr");
+    endpoint.searchParams.set("q", address);
+
+    try {
+      const response = await fetch(endpoint, { headers: { Accept: "application/json" } });
+      if (!response.ok) return null;
+      const results: unknown = await response.json();
+      if (!Array.isArray(results) || results.length === 0) return null;
+      const { lat, lon } = results[0] as { lat: string; lon: string };
+      return [Number.parseFloat(lat), Number.parseFloat(lon)];
+    } catch {
+      return null;
+    }
+  }
+
+  /** Carte affichée uniquement si l’adresse est géocodée ; sinon le bloc est masqué. */
+  async function initMap(el: HTMLElement): Promise<void> {
+    const address = el.dataset.mapAddress;
+    if (!address) return;
+
+    const coords = await geocodeAddress(address);
+    if (!coords) {
+      el.hidden = true;
+      return;
+    }
+
+    el.hidden = false;
+    const allowMotion = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const map = L.map(el, {
+      scrollWheelZoom: false,
+      zoomControl: false,
+      zoomAnimation: allowMotion,
+      fadeAnimation: allowMotion,
+      markerZoomAnimation: allowMotion,
+    }).setView(coords, ZOOM);
+    L.control
+      .zoom({
+        zoomInTitle: "Agrandir la carte",
+        zoomOutTitle: "Réduire la carte",
+      })
+      .addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 20,
+    }).addTo(map);
+    L.marker(coords, { alt: `Cabinet ${el.dataset.mapName ?? ""}`.trim() })
+      .addTo(map)
+      .bindPopup(`${el.dataset.mapName ?? "Cabinet"}<br>${address}`);
+  }
+
+  for (const el of document.querySelectorAll<HTMLElement>('[data-component="contact.map"]')) {
+    initMap(el);
+  }
+</script>
