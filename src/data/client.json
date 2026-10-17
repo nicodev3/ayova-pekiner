@@ -2,7 +2,7 @@
     "schemaVersion": 25,
     "profession": "psychologue",
     "business": {
-        "fullName": "Pierre Janet",
+        "fullName": "Ayova Pekiner",
         "title": "Psychologue",
         "city": "Lyon",
         "addressLine1": "12 rue de la Paix",
@@ -92,7 +92,7 @@
         }
     },
     "seo": {
-        "description": "Psychologue à Lyon, Pierre Janet accompagne adultes, adolescents et familles en cabinet ou en visio, avec une écoute confidentielle et un suivi adapté à chacun.",
+        "description": "Ayova Pekiner",
         "baseUrl": "https://exemple.fr",
         "ogImage": "https://exemple.fr/og.jpg"
     },
